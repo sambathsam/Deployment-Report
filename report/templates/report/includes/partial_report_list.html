@@ -1,0 +1,28 @@
+{% for report in reports %}
+  <tr>
+    <td>{{ report.Report_date }}</td>
+    <td>{{ report.Attendence }}</td>
+    <td>{{ report.Project_name }}</td>
+    <td>{{ report.Subproject_name }}</td>
+    <td>{{ report.Task }}</td>
+    <td>{{ report.No_hours }}</td>
+    <td>{{ report.No_count }}</td>
+    <td>{{ report.Comments }}</td>
+    <td>
+      <button type="button"
+              class="btn btn-warning btn-sm js-update-report"
+              data-url="{% url 'report_update' report.id %}">
+        <span class="glyphicon glyphicon-pencil"></span> Edit
+      </button>
+      <button type="button"
+              class="btn btn-danger btn-sm js-update-report"
+              data-url="{% url 'report_delete' report.id %}">
+        <span class="glyphicon glyphicon-trash"></span> Delete
+      </button>
+    </td>
+  </tr>
+{% empty %}
+  <tr>
+    <td colspan="8" class="text-center bg-warning">No Report</td>
+  </tr>
+{% endfor %}

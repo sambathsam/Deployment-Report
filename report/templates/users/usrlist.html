@@ -1,0 +1,43 @@
+{% extends 'base.html'%}
+{% block content %}
+{% if user.is_superuser %} 
+
+
+  <h1>Users List</h1>
+  {% if emp_list %}
+  <from method = "POST">
+	<table class="table table-striped">
+	  <thead>
+	    <tr>
+	      <th>Employee Name</th>
+	      <th>Employee Id</th>
+	      <th>Primary Project</th>
+	    </tr>
+	  </thead>
+	   	<tbody id="myTable">
+	    {% for emp in emp_list %}
+	        <tr>
+	        <td>{{ emp.username }}</td>
+	        <td>{{ emp.Empid }}</td>
+	        <td>{{ emp.primary_project }}</td>
+	        <td value ="{{ emp.Empid }}" name="{{ emp.Empid }}" id="myTable"><a href="/reportlist/{{ emp.Empid }}" class="btn btn-success btn-md">
+	          show reports
+	        </a></td>
+	        </tr>
+	    {% endfor %}
+	    </tbody>
+    </table>
+    </from> 
+  <ul class="list-unstyled CTAs">
+     <a href="{% url 'signup' %}" class="btn btn-primary btn-md">
+     <span class="glyphicon glyphicon-user"></span> Add User
+     </a>
+  </ul>
+  {% else %}
+    <p>There are no books in the library.</p>
+  {% endif %}  
+ {% else %}
+    <h1>You are not permited to view list Go back {{user.username}} </h1>
+  {% endif %}      
+ 
+{% endblock %}

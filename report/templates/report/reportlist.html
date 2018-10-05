@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'assets/css/style2.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/collapsib.css' %}">
+{%for datas in form%}
+	  {%for data in datas%}
+	   {% if forloop.counter == 1%}
+		  <button class="collapsible"> {{data}}</button>
+	   {%endif%}
+	   {% if forloop.counter == 2%}
+	      <div class="content">
+		      <table border="0" class="table" >
+		      <thead>
+		      <tr>
+		       <th>Process</th>
+			   <th>Date</th>
+			   <th>Hours</th>
+			   <th>Primary Process</th>
+			   <th>Comments</th></tr></thead>
+		      {%for process in data%}
+			  <tr>
+			  {% if process.Project_name == 1%}
+			  <td>Ratemetrics</td>
+			  {%elif process.Project_name == 2%}
+			  <td>Stortrack</td>
+			  {%elif process.Project_name == 3%}
+			  <td>Cengage</td>
+			  {%elif process.Project_name == 4%}
+			  <td>Stubhub</td>
+			  {%elif process.Project_name == 5%}
+			  <td>GED</td>
+			  {%else%}
+			  <td>Others</td>
+			  {%endif %}
+			  <td> {{process.Report_date}}</td>
+			  <td> {{process.No_hours}}</td>
+			  <td> {{process.Task}}</td>
+			  <td> {{process.Comments}}</td>
+			  </tr>
+			  {%endfor%}
+			  </table>
+			  
+		  </div>
+	   {%endif%}
+	 {%endfor%}
+	{%endfor%}
+	
+{%endblock%}

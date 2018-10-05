@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block javascript %}
+  <script src="{%static 'report/js/report.js'%}"></script>
+{% endblock %}
+
+{% block content %}
+  <h3 class="page-header" align="center">Production Report <h4 align="right">Pending Hours to Report : <span class="glyphicon glyphicon-time"></span> {{Hours}}</h4></h3>
+  
+          
+        
+  <nav class="navbar">
+  	<div class="container-fluid">
+      <div class="navbar-header">
+    	<button type="button" class="btn btn-primary js-create-report" data-url="{% url 'report_create' %}">
+      	<span class="glyphicon glyphicon-plus"></span>
+      		New Report
+    	</button></div>
+    	
+  <div class="navbar-header navbar-right">
+     <ul class="nav navbar-nav navbar-right">
+     	<a href="/reports" class="btn btn-primary float-sm-right">
+          <span class="glyphicon glyphicon-refresh"></span> Refresh
+        </a></ul></div></div>
+  </nav>
+  <table class="table" id="report-table">
+    <thead>
+      <tr>
+        <th>Reportdate</th>
+        <th>Attendence</th>
+        <th>Project</th>
+        <th>Subproject</th>
+        <th>Task</th>
+        <th>Hours</th>
+        <th>Count</th>
+        <th>Comments</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% include 'report/includes/partial_report_list.html' %}
+  	</tbody>
+  </table>
+  <div class="modal fade" id="modal-report">
+    <div class="modal-dialog">
+      <div class="modal-content">
+      
+      </div>
+    </div>
+  </div>
+{% endblock %}

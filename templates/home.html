@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+	{% if user.is_superuser %} 
+	<h1>Production Report Admin Panel</h1>
+	<h1>Hi {{ user.username }}</h1>
+		
+	<p><a href="{% url 'logout' %}">Log out</a></p>
+	<p><a href="{% url 'signup' %}">Sign Up</a></p>
+	<p><a href="{% url 'userlist' %}">All Employees</a></p>
+
+	{% elif user.is_active %}
+	
+	<h3>Hi {{ user.username }}</h3>
+	
+	{% else %}
+	<h1>Production Report Login</h1>
+	<p><a href="{% url 'login' %}">Log In </a></p>
+	{% endif %}
+{% endblock %}
+
+

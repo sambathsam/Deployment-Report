@@ -1,0 +1,40 @@
+{% load widget_tweaks %}
+<form method="post" action="{% url 'report_update' form.instance.pk %}" id="DetailForm"  class="js-report-update-form"  data-cities-url="/hr/ajax/load-cities/">
+  {% csrf_token %}
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="Myfunction()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <h4 class="modal-title">Update Reports</h4>
+  </div>
+  <div class="modal-body">
+	{{form.as_p}}
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="Myfunction()">Close</button>
+    <button type="submit" class="btn btn-primary" >Update report</button>
+  </div>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+ function Myfunction(){
+	 window.location.href='{% url 'report_list' %}';
+	}
+</script>
+<script>
+  $("#id_Project_name").change(function () {
+    var url = $("#DetailForm").attr("data-cities-url");  // get the url of the `load_cities` view
+    var countryId = $(this).val();  // get the selected country ID from the HTML input
+    $.ajax({                       // initialize an AJAX request
+      url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+      data: {
+        'Project_name': countryId       // add the country id to the GET parameters
+      },
+      success: function (data) {   // `data` is the return of the `load_cities` view function
+        $("#id_Subproject_name").html(data);  // replace the contents of the city input with the data that came from the server
+      }
+    });
+
+  });
+</script>

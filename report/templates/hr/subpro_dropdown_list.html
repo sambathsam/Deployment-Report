@@ -1,0 +1,7 @@
+{% load widget_tweaks %}
+<option value="">---------</option>
+{% for sp in data %}
+<option value="{{ sp.pk }}">{{ sp.Subproject_name }}</option>
+{% endfor %} 
+
+
