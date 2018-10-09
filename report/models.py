@@ -13,7 +13,8 @@ class CustomUser(AbstractUser):
     EmpName         = models.CharField(max_length=250)
     date_join       = models.DateField(blank=True, null=True)   
     primary_process = models.CharField(max_length=250)
-    processwillInclude = models.CharField(max_length=250)
+    processwillInclude = models.CharField(blank=True, max_length=250)
+    Designation = models.CharField(blank=True, max_length=250, null=True)
     def __str__(self):
         return self.EmpName
     def split_tags(self):

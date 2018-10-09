@@ -6,51 +6,93 @@
 	  <form method="post">
 	  {% csrf_token %}
 	  <h2 align="center">Create User</h2>
-		<div class="form-group row">
-			<div class="col-xs-5">
-		  	<label for="id_username">Username</label> 
-		  	<input type="text" class="form-control" name="username" id="id_username" required  maxlength="150">
-			</div></div>
-		<div class="form-group row"><div class="col-xs-5">
-		<label for="id_email">Email </label> 
-		<input type="email" class="form-control" name="email" id="id_email" maxlength="254">
-		</div></div>
-		<div class="form-group row"><div class="col-xs-5">
-		<label for="id_primary_project">Primary project</label>
-		 <input type="text" class="form-control" name="primary_project" id="id_primary_project" required maxlength="250">
+                         <!--{{form.as_p}}-->
+          <div class="form-group row"><div class="col-xs-5">
+		<label for="id_EmpName">EmpName:</label> 
+		<input type="text" class="form-control" name="EmpName" id="id_EmpName" required maxlength="250">
 		</div></div>
 		<div class="form-group row"><div class="col-xs-5">
 		<label for="id_Empid">Empid:</label>
 		 <input type="number" class="form-control" name="Empid" id="id_Empid" required>
 		</div></div>
-		<div class="form-group row"><div class="col-xs-5">
-		<label for="id_EmpName">EmpName:</label> 
-		<input type="text" class="form-control" name="EmpName" id="id_EmpName" required maxlength="250">
+           <div class="form-group row"><div class="col-xs-5">
+		<label for="id_email">Email </label> 
+	    <input type="email" class="form-control" name="email" id="id_email" maxlength="254" required>
 		</div></div>
 		<div class="form-group row"><div class="col-xs-5">
-		<label for="id_date_join">Date join:</label>
-		 <input type="text" class="form-control" name="date_join" id="id_date_join">
+		<label for="id_date_join">Date of join:</label>
+		 <input type="Date" class="form-control" name="date_join" id="id_date_join" required>
+		</div></div>
+                <div class="form-group row"><div class="col-xs-5">
+		<label for="id_Designation">Designation:</label> 
+		<select class="form-control" name="Designation" id="id_Designation" required>
+                <option value= "default" selected disable hidden>Select Designation</option>
+                <option value= "Python Developer">Python Developer</option>
+		<option value= "Java Developer">Java Developer</option>
+                <option value= "Process Associate">Process Associate</option>
+                <option value= "Team Lead">Tema Lead</option>
+                <option value= "Manager">Manager</option>
+                <option value= "Python Developer Trainee">Python Developer Trainee</option>
+		<option value= "Java Developer Trainee">Java Developer Trainee</option>
+                <option value= "Process Associate Trainee">Process Associate Trainee</option>
+                </select>
 		</div></div>
 		<div class="form-group row"><div class="col-xs-5">
-		<label for="id_primary_process">Primary process:</label> 
-		<input type="text" class="form-control" name="primary_process" id="id_primary_process" required maxlength="250">
+		<label for="id_primary_process">Primary Project:</label> 
+		<select class="form-control" name="primary_process" id="id_primary_process" required>
+                <option value= "default" selected disable hidden>Select Primary Process</option>
+                <option value= "Ratemetrics">Ratemetrics</option>
+		<option value= "StorTrack">StorTrack</option>
+                <option value= "Stubhub">Stubhub</option>
+                <option value= "ACP">ACP</option>
+                <option value= "ACP">GED</option>
+                <option value= "JTI">JTI</option>
+                <option value= "Cengage">Cengage</option>
+                </select>
 		</div></div>
+                <div class="form-group row"><div class="col-xs-5">
+		<label for="id_primary_project">Primary Task</label>
+		 <select class="form-control" name="primary_project" id="id_primary_project" required>
+                    <option value= "default" selected disable hidden>Select Nature of Job</option>
+		        <option value= "Python Scripting">Python Scripting</option>
+			<option value= "Java Scripting">Java Scripting</option>
+		        <option value= "QA & Deleviery">QA & Deleviery</option>
+                        <option value= "Mapping">Mapping</option>
+                        <option value= "Tool Monitoring">Tool Monitoring and Delivery</option>
+                        <option value= "Manual">Manual</option>       
+                 </select>
+		</div></div>
+                <!--<div class="form-group row"><div class="col-xs-5">
+		<label for="id_Designation">Designation:</label> 
+		<input type = "text"  class="form-control" name="Designation" id="id_Designation" required>
+	        </div></div>
+                <div class="form-group row"><div class="col-xs-5">
+		<label for="id_primary_process">Primary Project:</label> 
+		<input type = "text" class="form-control" name="primary_process" id="id_primary_process" required>
+                </div></div>
 		<div class="form-group row"><div class="col-xs-5">
-		<label for="id_processwillInclude">Process will Include:</label> 
-		<input type="text" class="form-control" name="processwillInclude" id="id_processwillInclude" required maxlength="250">
-		</div></div>
+		<label for="id_primary_project">Primary Task</label>
+		 <input type = "text" class="form-control" name="primary_project" id="id_primary_project" required>
+                </div></div>-->
 		<div class="form-group">
 		<label for="id_is_superuser">is Superuser:</label> 
 		<input type="checkbox"  name="is_superuser" id="id_is_superuser"> 
 		</div>
+		<div class="form-group row">
+			<div class="col-xs-5">
+		  	<label for="id_username">Username</label> 
+		  	<input type="text" class="form-control" name="username" id="id_username" required  maxlength="150" placeholder = "Username with @anddomainname of user's mailid">
+			</div></div>
+		
+		
 		<div class="form-group row"><div class="col-xs-5">
 		<label for="id_password1">Password:</label>
-		<input type="password" class="form-control" name="password1" id="id_password1" required> 
+		<input type="password" class="form-control" name="password1" id="id_password1" required placeholder = "Username along with Empid without space"> 
 		<span class="help-block">Password must be contain 8 characters</span>
 		</div></div>
 		<div class="form-group row"><div class="col-xs-5">
 		<label for="id_password2">Password confirmation:</label>
-		<input type="password" class="form-control" name="password2" id="id_password2" required>
+		<input type="password" class="form-control" name="password2" id="id_password2" required placeholder = "Username along with Empid without space">
 		</div></div>
 		<div class="row">
 		 <button type="submit"  class="btn btn-success">Create</button></div>

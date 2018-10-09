@@ -6,7 +6,7 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = CustomUser
         fields = ('username', 'email','primary_project','Empid','EmpName','date_join',
-                  'primary_process','processwillInclude','is_superuser')
+                  'primary_process','is_superuser', 'Designation')
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model  = CustomUser

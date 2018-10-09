@@ -12,18 +12,22 @@
 	      <th>Employee Name</th>
 	      <th>Employee Id</th>
 	      <th>Primary Project</th>
+	      <th>Date Of Join</th>
 	    </tr>
 	  </thead>
 	   	<tbody id="myTable">
 	    {% for emp in emp_list %}
+               {%if not emp.username == 'Admin'%}
 	        <tr>
-	        <td>{{ emp.username }}</td>
+	        <td>{{ emp.EmpName |title }}</td>
 	        <td>{{ emp.Empid }}</td>
 	        <td>{{ emp.primary_project }}</td>
+	        <td>{{ emp.date_join }}</td>
 	        <td value ="{{ emp.Empid }}" name="{{ emp.Empid }}" id="myTable"><a href="/reportlist/{{ emp.Empid }}" class="btn btn-success btn-md">
 	          show reports
 	        </a></td>
 	        </tr>
+               {%endif%}
 	    {% endfor %}
 	    </tbody>
     </table>
