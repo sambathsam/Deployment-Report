@@ -38,6 +38,8 @@ class Reports(models.Model):
         ('Re-scripting', 'Rescripting'),
         ('Analysis', 'Analysis'),
         ('Manual', 'Manual'),
+        ('Tool Monitoring', 'Tool Monitoring'),
+        ('Meeting', 'Meeting'),
     )
     id    = models.AutoField(primary_key=True,null=False)
     Empid = models.IntegerField(default='', blank=True)

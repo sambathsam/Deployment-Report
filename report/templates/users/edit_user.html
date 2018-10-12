@@ -5,42 +5,42 @@
   <div class="container">
 	  <form method="post">
 	  {% csrf_token %}
-	  {% if form.errors %}
-		    {% for field in form %}
-		        {% for error in field.errors %}
-		            <div class="alert alert-danger">
-		                <strong>{{ error|escape }}</strong>
-		            </div>
-		        {% endfor %}
-		    {% endfor %}
-		    {% for error in form.non_field_errors %}
-		        <div class="alert alert-danger">
-		            <strong>{{ error|escape }}</strong>
-		        </div>
-		    {% endfor %}
-		{% endif %}
+		  {% if form.errors %}
+			    {% for field in form %}
+			        {% for error in field.errors %}
+			            <div class="alert alert-danger">
+			                <strong>{{ error|escape }}</strong>
+			            </div>
+			        {% endfor %}
+			    {% endfor %}
+			    {% for error in form.non_field_errors %}
+			        <div class="alert alert-danger">
+			            <strong>{{ error|escape }}</strong>
+			        </div>
+			    {% endfor %}
+			{% endif %}
 	  <h2 align="center">Create User</h2>
                          <!--{{form.as_p}}-->
           <div class="form-group row"><div class="col-xs-5">
 		<label for="id_EmpName">EmpName:</label> 
-		<input type="text" class="form-control" name="EmpName" id="id_EmpName" required maxlength="250">
+		<input type="text" class="form-control" name="EmpName" id="id_EmpName" required maxlength="250" value="{{form.EmpName.value}}" >
 		</div></div>
 		<div class="form-group row"><div class="col-xs-5">
 		<label for="id_Empid">Empid:</label>
-		 <input type="number" class="form-control" name="Empid" id="id_Empid" required>
+		 <input type="number" class="form-control" name="Empid" id="id_Empid" required value="{{form.Empid.value}}">
 		</div></div>
            <div class="form-group row"><div class="col-xs-5">
 		<label for="id_email">Email </label> 
-	    <input type="email" class="form-control" name="email" id="id_email" maxlength="254" required>
+	    <input type="email" class="form-control" name="email" id="id_email" maxlength="254" required value="{{form.email.value}}">
 		</div></div>
 		<div class="form-group row"><div class="col-xs-5">
-		<label for="id_date_join">Date of join:</label>
-		 <input type="Date" class="form-control" name="date_join" id="id_date_join" required>
+		<label for="id_date_join">Date of join :</label> {{form.date_join.value}}
+		 <input type="date" class="form-control" name="date_join" id="id_date_join"  required>
 		</div></div>
                 <div class="form-group row"><div class="col-xs-5">
 		<label for="id_Designation">Designation:</label> 
 		<select class="form-control" name="Designation" id="id_Designation" required>
-                <option value= "default" selected disable hidden>Select Designation</option>
+                <option value= "" selected disable hidden>Select Designation</option>
                 <option value= "Python Developer">Python Developer</option>
 		<option value= "Java Developer">Java Developer</option>
                 <option value= "Process Associate">Process Associate</option>
@@ -54,7 +54,7 @@
 		<div class="form-group row"><div class="col-xs-5">
 		<label for="id_primary_process">Primary Project:</label> 
 		<select class="form-control" name="primary_process" id="id_primary_process" required>
-                <option value= "default" selected disable hidden>Select Primary Process</option>
+                <option value= "" selected disable hidden>Select Primary Process</option>
                 <option value= "Ratemetrics">Ratemetrics</option>
 		<option value= "StorTrack">StorTrack</option>
                 <option value= "Stubhub">Stubhub</option>
@@ -67,7 +67,7 @@
                 <div class="form-group row"><div class="col-xs-5">
 		<label for="id_primary_project">Primary Task</label>
 		 <select class="form-control" name="primary_project" id="id_primary_project" required>
-                    <option value= "default" selected disable hidden>Select Nature of Job</option>
+                    <option value= "" selected disable hidden>Select Nature of Job</option>
 		        <option value= "Python Scripting">Python Scripting</option>
 			<option value= "Java Scripting">Java Scripting</option>
 		        <option value= "QA & Deleviery">QA & Deleviery</option>
@@ -88,33 +88,33 @@
 		<label for="id_primary_project">Primary Task</label>
 		 <input type = "text" class="form-control" name="primary_project" id="id_primary_project" required>
                 </div></div>-->
-		<div class="form-group">
-		<label for="id_is_superuser">is Superuser:</label> 
-		<input type="checkbox"  name="is_superuser" id="id_is_superuser"> 
-		</div>
-		<div class="form-group row">
-			<div class="col-xs-5">
-		  	<label for="id_username">Username</label> 
-		  	<input type="text" class="form-control" name="username" id="id_username" required  maxlength="150" placeholder = "Username with @anddomainname of user's mailid">
+			<div class="form-group">
+			<label for="id_is_superuser">is Superuser:</label> 
+			<input type="checkbox"  name="is_superuser" id="id_is_superuser"> 
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+			  	<label for="id_username">Username</label> 
+			  	<input type="text" class="form-control" name="username" id="id_username" required  maxlength="150" placeholder = "Username with @anddomainname of user's mailid" value="{{form.username.value}}">
+				</div></div>
+			
+			<div class="form-group row"><div class="col-xs-5">
+			<label for="id_password1">Password:</label>
+			<input type="password" class="form-control" name="password1" id="id_password1" required placeholder = "Username along with Empid without space"> 
+			<span class="help-block">Password must be contain 8 characters</span>
 			</div></div>
-		
-		<div class="form-group row"><div class="col-xs-5">
-		<label for="id_password1">Password:</label>
-		<input type="password" class="form-control" name="password1" id="id_password1" required placeholder = "Username along with Empid without space"> 
-		<span class="help-block">Password must be contain 8 characters</span>
-		</div></div>
-		<div class="form-group row"><div class="col-xs-5">
-		<label for="id_password2">Password confirmation:</label>
-		<input type="password" class="form-control" name="password2" id="id_password2" required placeholder = "Username along with Empid without space">
-		</div></div>
-		<div class="row">
-		 <button type="submit"  class="btn btn-success">Create</button></div>
+			<div class="form-group row"><div class="col-xs-5">
+			<label for="id_password2">Password confirmation:</label>
+			<input type="password" class="form-control" name="password2" id="id_password2" required placeholder = "Username along with Empid without space">
+			</div></div>
+			<div class="row">
+			 <button type="submit"  class="btn btn-success">Update</button></div>
 	  	</form>
 	</div>
   {% elif user.is_active %}
 	<h1>You are customer user</h1>
 	{% else %}
 <p> you are not superuser login as supper user to create users</p>
-<p><a href="{% url 'login' %}">Log In </a></p>
+<p><a href="{% url 'login' %}"> Log In </a></p>
 {% endif %}
 {%endblock%}

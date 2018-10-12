@@ -58,6 +58,20 @@
             
             <form method="post" class="bg-white rounded pb_form_v1">
              {% csrf_token %}
+             {% if form.errors %}
+				    {% for field in form %}
+				        {% for error in field.errors %}
+				            <div class="alert alert-danger">
+				                <strong>{{ error|escape }}</strong>
+				            </div>
+				        {% endfor %}
+				    {% endfor %}
+				    {% for error in form.non_field_errors %}
+				        <div class="alert alert-danger">
+				            <strong>{{ error|escape }}</strong>
+				        </div>
+				    {% endfor %}
+				{% endif %}
               <h2 class="mb-4 mt-0 text-center">Sign In</h2>
                <div class="form-group">
                

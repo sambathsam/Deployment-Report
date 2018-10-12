@@ -1,5 +1,4 @@
 from django.shortcuts import render,redirect
-from django.views.generic import TemplateView
 from django.urls import reverse_lazy
 from django.views import generic
 # Create your views here.
@@ -11,17 +10,18 @@ from django.template.loader import render_to_string
 from django.http import JsonResponse,HttpResponse
 from .models import Reports,Project,Subproject,datesofmonth
 from .forms import ReportForm,ReportFormup
-import xlwt,time,datetime,json
+import xlwt,datetime,json
 from django.http.response import HttpResponseRedirect
 from datetime import timedelta
 from django.utils import timezone
 from django.db.models import Sum
-
-
+from django.contrib import messages
+from django.db.models import Q
+from report.models import CustomUser
+    
 class SignUp(generic.CreateView):
-
     form_class    = CustomUserCreationForm
-    success_url   = reverse_lazy('login')
+    success_url   = reverse_lazy('userlist')
     template_name = 'registration/signup.html'
     
 def HomePageView(request):
@@ -43,7 +43,6 @@ def save_report_form(request, form, template_name):
             form.save()
             data['form_is_valid'] = True
             reports = Reports.objects.filter(Empid=request.user.Empid,dtcollected=datetime.date.today()).order_by('Report_date')
-            time.sleep(1)
             data['html_report_list'] = render_to_string('report/includes/partial_report_list.html', {
                 'reports': reports
             })
@@ -52,7 +51,20 @@ def save_report_form(request, form, template_name):
     context = {'form': form,'data':data1}
     data['html_form'] = render_to_string(template_name, context, request=request)
     return JsonResponse(data)
-def valuecheck(request):
+def valuecheck(request,hours):
+    hour_issue = False
+    rp_hr = str(request.POST['No_hours']).split('.')
+    if hours['No_hours__sum'] ==None:
+        db_hr = 0
+        total_hours = int(db_hr)+int(rp_hr[0])
+    else:
+        db_hr = str(hours['No_hours__sum']).split('.')
+        a  = 0
+        if len(rp_hr) ==2:
+            a = int(rp_hr[1])/60
+        total_hours = int(db_hr[0])+int(rp_hr[0])+a
+    if (total_hours>=24):
+        hour_issue = True
     if request.POST['No_count']=='':
         request.POST = request.POST.copy()
         request.POST['No_count']=0
@@ -72,17 +84,14 @@ def valuecheck(request):
         request.POST['Task'] =''
         request.POST['Project_name'] = None
         request.POST['Subproject_name'] = None
-    return request
+    return request,hour_issue
+
 def pendingdate(request,empid):
     reportsdate = Reports.objects.values('Report_date').filter(Empid=empid)
     daterange = datesofmonth.objects.exclude(weekday__in = reportsdate)
-    missdates  = daterange.filter(weekday__range=(datetime.date.today().replace(day=1),datetime.date.today()))
+    missdates = daterange.filter(weekday__range=(datetime.date.today().replace(day=1),datetime.date.today()))
     newdict  = {}
     some_day_last_week = timezone.now().date() - timedelta(days=7)
-#     monday_of_last_week = some_day_last_week - timedelta(days=(some_day_last_week.isocalendar()[2] - 1))
-#     print(monday_of_last_week)
-#     monday_of_this_week = monday_of_last_week + timedelta(days=7)
-#     print(monday_of_this_week)
     datadict =  Reports.objects.filter(Empid=empid,Report_date__range=[some_day_last_week,datetime.date.today()])#,created_at__Report_date=monday_of_last_week, created_at__Report_date=monday_of_this_week)
     datadict = serializers.serialize("json", datadict)
     for fields in json.loads(datadict):
@@ -92,7 +101,17 @@ def pendingdate(request,empid):
             newdict[str(fields['fields']['Report_date'])] = [fields['fields']]
     newdict = sorted(newdict.items())
     return newdict,missdates
-
+def edit_report(request):
+    if request.user.is_authenticated:
+        if request.method=='POST':
+            print(request.POST['show_date'])
+            reports = Reports.objects.filter(Empid=request.user.Empid,Report_date=request.POST['show_date'])
+            return render(request,'report/edit_report.html', {'reports': reports})
+        else:
+            return render(request,'report/edit_report.html',{})
+    else:
+        return redirect("login")
+    
 def reportList(request):
     if request.user.is_authenticated:
         empid=request.user.Empid
@@ -101,7 +120,9 @@ def reportList(request):
         hours =  Reports.objects.filter(Empid=request.user.Empid,Report_date=datetime.date.today()).aggregate(Sum('No_hours'))
         if (hours['No_hours__sum']!=None):
             hr    = str(hours['No_hours__sum']).split('.')
+            print(hr)
             pending = datetime.timedelta(hours = int(hr[0]), minutes=int(hr[1]))
+            print(pending)
             if datetime.datetime.strptime(str(pending),'%H:%M:%S') < datetime.datetime.strptime('8:00:00','%H:%M:%S'):
                 totasubmitedHRS = datetime.datetime.strptime(str(pending),'%H:%M:%S')
                 total_defautHRS = datetime.datetime.strptime('8:00:00','%H:%M:%S')
@@ -113,10 +134,16 @@ def reportList(request):
         return render(request,'report/report_list.html', {'reports': reports,'dates':missdates,'Hours':str(pending_hrs)})    
     else:
         return redirect("home")
+    
 def report_create(request):
     if request.method == 'POST':
-        request = valuecheck(request)
-        form = ReportForm(request.POST)
+        hours =  Reports.objects.filter(Empid=request.user.Empid,Report_date=datetime.date.today()).aggregate(Sum('No_hours'))
+        request,hr_issue = valuecheck(request,hours)
+        if hr_issue:
+            messages.warning(request, 'Number of Hours Exceed More than 24.')
+            form = ReportForm()
+        else:
+            form = ReportForm(request.POST)
     else:
         form = ReportForm()
     return save_report_form(request, form, 'report/includes/partial_report_create.html')
@@ -124,8 +151,13 @@ def report_create(request):
 def report_update(request, pk):
     report = get_object_or_404(Reports, pk=pk)
     if request.method == 'POST':
-        request = valuecheck(request)
-        form = ReportFormup(request.POST, instance=report)
+        hours =  Reports.objects.filter(~Q(id = pk),Empid=request.user.Empid,Report_date=datetime.date.today()).aggregate(Sum('No_hours'))
+        request,hr_issue = valuecheck(request,hours)
+        if hr_issue:
+            messages.warning(request, 'Hours Exceed More than 24.')
+            form = ReportFormup(instance=report)
+        else:
+            form = ReportFormup(request.POST, instance=report)
     else:
         form = ReportFormup(instance=report)
     return save_report_form(request, form, 'report/includes/partial_report_update.html')
@@ -155,16 +187,44 @@ def load_subpro(request):
 
 
 def reportlist(request):
-    print(request.POST)
-    empid = request.user.Empid
-    newdict,missdates = pendingdate(request,empid)
-    return render(request, "report/reportlist.html", {'form': newdict, 'dates' : missdates})
-
+    if request.user.is_authenticated:
+        empid = request.user.Empid
+        newdict,missdates = pendingdate(request,empid)
+        if request.method=='POST':
+            newdict = {}
+            datadict = Reports.objects.filter(Empid=request.user.Empid,Report_date=request.POST['show_date'])
+            datadict = serializers.serialize("json", datadict)
+            for fields in json.loads(datadict):
+                if (str(fields['fields']['Report_date'])) in newdict:
+                    newdict[str(fields['fields']['Report_date'])].append(fields['fields'])
+                else:
+                    newdict[str(fields['fields']['Report_date'])] = [fields['fields']]
+            newdict = sorted(newdict.items())
+            return render(request, "report/reportlist.html", {'form': newdict, 'dates' : missdates})
+        else:
+            return render(request, "report/reportlist.html", {'form': newdict, 'dates' : missdates})
+    else:
+        return redirect('login')
+    
 def reportlist_emp(request,eid):
     newdict,missdates = pendingdate(request,eid)
     return render(request, "report/reportlist.html", {'form': newdict, 'dates' : missdates})
 
-
+def edit_user(request,eid):
+    if request.user.is_authenticated:
+        print(eid)
+        result_set = get_object_or_404(CustomUser, Empid=eid)
+        if request.method =="POST":
+            print(request.POST)
+            form = CustomUserCreationForm(request.POST, instance=result_set)
+            if form.is_valid():
+                form.save()
+                return redirect('userlist')
+            else:
+                print("invalid")
+    #     result_set = CustomUser.objects.filter(Empid=eid)
+        form = CustomUserCreationForm(instance=result_set)
+        return render(request, 'users/edit_user.html',{'form':form})
 def export_users_xls(request):
     if request.method=="POST":
         response = HttpResponse(content_type='application/ms-excel')

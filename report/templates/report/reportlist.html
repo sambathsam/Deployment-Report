@@ -5,6 +5,12 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'assets/css/style2.css' %}">
 <link rel="stylesheet" href="{% static 'assets/css/collapsib.css' %}">
+<form method ="post">{% csrf_token %}
+  
+  <h5 align="left" >Select Date : <input type="date" name="show_date"/>
+       <button type="submit" class="btn btn-info"><span class="glyphicon glyphicon-search"></span> Search</button>
+	</h5>
+  </form>
 {%for datas in form%}
 	  {%for data in datas%}
 	   {% if forloop.counter == 1%}
@@ -32,6 +38,10 @@
 			  <td>Stubhub</td>
 			  {%elif process.Project_name == 5%}
 			  <td>GED</td>
+			  {%elif process.Project_name == 6%}
+			  <td>JTI</td>
+			  {%elif process.Project_name == 7%}
+			  <td>ACP</td>
 			  {%else%}
 			  <td>Others</td>
 			  {%endif %}
@@ -42,10 +52,16 @@
 			  </tr>
 			  {%endfor%}
 			  </table>
-			  
 		  </div>
 	   {%endif%}
 	 {%endfor%}
 	{%endfor%}
+	<br>
 	
+	{%if request.path  == '/reportlist/' %}
+	<a href="/editreports" class="btn btn-primary float-sm-right">
+     	<span class="glyphicon glyphicon-edit"></span>
+     		Edit Previous Report
+   	</a>
+   	{%endif%}
 {%endblock%}
