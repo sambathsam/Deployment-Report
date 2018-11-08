@@ -1,0 +1,79 @@
+{% extends 'base.html'%} 
+
+{% block content %}
+  {% if user.is_superuser %} 
+  <div class="container">
+  <h2 align="center">Performance Review</h2>
+  <div class="row">
+  <div class="col-sm-3 col-md-6 col-lg-8">
+      <form method="post" >
+      {% csrf_token %}
+      {% if form.errors %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <div class="alert alert-danger">
+                        <strong>{{ error|escape }}</strong>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <strong>{{ error|escape }}</strong>
+                </div>
+            {% endfor %}
+        {% endif %}
+	         <div class="form-group row"><div class="col-xs-5"><label for="id_Name">Name:</label> <input type="text" name="Name" class="form-control"  id="id_Name" value="{{data.EmpName}}"></div></div>
+	    <div class="form-group row"><div class="col-xs-5"><label for="id_EmpID">EmpID:</label> <input type="number" name="EmpID" class="form-control" id="id_EmpID" value="{{data.Empid}}"></div></div>
+	    <div class="form-group row"><div class="col-xs-5"><label for="id_Attitude">Attitude:</label> <input type="number" min="1" max="5"  step="any" name="Attitude" class="form-control" id="id_Attitude"></div></div>
+	    <div class="form-group row"><div class="col-xs-5"><label for="id_TaskInterpretation">Task Interpretation:</label> <input type="number" min="1" max="5" step="any" name="TaskInterpretation" class="form-control" id="id_TaskInterpretation"></div></div>
+	    <div class="form-group row"><div class="col-xs-5"><label for="id_TaskUnderstanding">Task Understanding:</label> <input type="number" name="TaskUnderstanding" min="1" max="5" step="any" class="form-control" id="id_TaskUnderstanding"></div></div>
+	    <div class="form-group row"><div class="col-xs-5"><label for="id_Approach">Approach:</label> <input type="number" min="1" max="5" step="any" name="Approach" class="form-control" id="id_Approach"></div></div>
+	    <div class="form-group row"><div class="col-xs-5"><label for="id_Communication">Communication:</label> <input type="number" min="1" max="5" step="any" name="Communication" class="form-control" id="id_Communication"></div></div>
+	    <div class="form-group row"><div class="col-xs-5"><label for="id_Execution">Execution:</label> <input type="number" step="any" min="1" max="5" name="Execution" class="form-control" id="id_Execution"></div></div>
+	    <div class="form-group row"><div class="col-xs-5"><label for="id_Commitment">Commitment:</label> <input type="number" step="any" min="1" max="5" name="Commitment" class="form-control" id="id_Commitment"></div></div>
+	    <div class="form-group row"><div class="col-xs-5"><label for="id_Fulfillment">Fulfillment:</label> <input type="number" step="any" min="1" max="5" name="Fulfillment" class="form-control" id="id_Fulfillment"></div></div>
+	    <div class="form-group row"><div class="col-xs-5"><label for="id_Performance">Performance:</label> <input type="number" step="any" min="1" max="5" name="Performance" class="form-control" id="id_Performance" onfocus="add_number()" readonly="true"></div></div>
+	    <div class="form-group row"><div class="col-xs-5"><label for="id_Comments">Comments:</label> <input type="text" name="Comments" class="form-control"  id="id_Comments"></div></div>
+	        <div class="form-group row">
+         	<button type="submit"  class="btn btn-success">Create</button>
+         	<tr><td value ="{{data.EmpName}}" name="{{data.Empid}}" id="myTable"><a href="/reviewlist/{{data.Empid}}" class="btn btn-primary btn-md">Previous Reviews</a></td></tr>
+        </div></form>
+    </div>
+    <div class="col-sm-9 col-md-6 col-lg-2">
+    	<table class="table">
+	    <thead>
+	      <tr>
+	        <th>Score</th>
+	        <th>Definition</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr><td>1</td><td>Very Good</td></tr>
+	      <tr><td>2</td><td>Good</td></tr>
+	      <tr><td>3</td><td>Average</td></tr>
+	      <tr><td>4</td><td>Poor</td></tr>
+	      <tr><td>5</td><td>Very Poor</td></tr></tbody></table>
+    </div></div></div>
+    <script>
+	    function add_number() {
+	        var Attitude  = parseFloat(document.getElementById("id_Attitude").value);
+	        var TaskInter = parseFloat(document.getElementById("id_TaskInterpretation").value);
+	        var Task      = parseFloat(document.getElementById("id_TaskUnderstanding").value);
+	        var Approach  = parseFloat(document.getElementById("id_Approach").value);
+	        var Commu	  = parseFloat(document.getElementById("id_Communication").value);
+	        var Execution = parseFloat(document.getElementById("id_Execution").value);
+	        var Commit    = parseFloat(document.getElementById("id_Commitment").value);
+	        var Fulfill   = parseFloat(document.getElementById("id_Fulfillment").value);
+	        var result = (Attitude+TaskInter+Task+Approach+Commu+Execution+Commit+Fulfill)/8;
+	        document.getElementById("id_Performance").value = result;
+	    }
+	    </script>
+	    
+  {% elif user.is_active %}
+    <h1>You are customer user</h1>
+    {% else %}
+<p> you are not superuser login as supper user to create users</p>
+<p><a href="{% url 'login' %}">Log In </a></p>
+{% endif %}
+{%endblock%}
+

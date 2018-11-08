@@ -1,46 +1,52 @@
 {% load widget_tweaks %}
 
-<div class="form-group row"><div class="col-xs-8">
-	<label for="id_Report_date">Report date:</label> <input class="form-control" type="date" name="Report_date"  id="id_Report_date" required>
-	</div></div>
-<p>
-	<label for="id_Attendence_0">Attendence:</label> <ul id="id_Attendence">
-    <li><label for="id_Attendence_0"><input type="radio" name="Attendence" value="Present" id="id_Attendence_0"  checked>Present</label></li>
-    <li><label for="id_Attendence_1"><input type="radio" name="Attendence" value="Leave" id="id_Attendence_1" >leave</label></li>
-	<li><label for="id_Attendence_2"><input type="radio" name="Attendence" value="Half day leave" id="id_Attendence_2" >Half day leave</label></li>
-	<li><label for="id_Attendence_3"><input type="radio" name="Attendence" value="Permission" id="id_Attendence_3" >Permission</label></li>
-	<li><label for="id_Attendence_4"><input type="radio" name="Attendence" value="WO" id="id_Attendence_4" >Week Off</label></li>
-	<li><label for="id_Attendence_5"><input type="radio" name="Attendence" value="OT" id="id_Attendence_5" >Over Time</label></li>
-	<li><label for="id_Attendence_6"><input type="radio" name="Attendence" value="GH" id="id_Attendence_6" >Govt Holiday</label></li>
-</ul></p>
-
-<div class="form-group row"><div class="col-xs-8">
-	<label for="id_Project_name">Project name:</label> <select class="form-control" name="Project_name"  id="id_Project_name">
+	<div class="form-group row"><div class="col-xs-8">
+		<label for="id_Report_date">Report date:</label> <input class="form-control" type="date" name="Report_date"  id="id_Report_date" required>
+		</div></div>
+	<p>
+		<label for="id_Attendence_0">Attendence:</label> <ul id="id_Attendence">
+	    <li><label for="id_Attendence_0"><input type="radio" name="Attendence" value="Present" id="id_Attendence_0"  checked>Present</label></li>
+	    <li><label for="id_Attendence_1"><input type="radio" name="Attendence" value="Leave" id="id_Attendence_1" >leave</label></li>
+		<li><label for="id_Attendence_2"><input type="radio" name="Attendence" value="Half day leave" id="id_Attendence_2" >Half day leave</label></li>
+		<li><label for="id_Attendence_3"><input type="radio" name="Attendence" value="Permission" id="id_Attendence_3" >Permission</label></li>
+		<li><label for="id_Attendence_4"><input type="radio" name="Attendence" value="WO" id="id_Attendence_4" >Week Off</label></li>
+		<li><label for="id_Attendence_5"><input type="radio" name="Attendence" value="OT" id="id_Attendence_5" >Over Time</label></li>
+		<li><label for="id_Attendence_6"><input type="radio" name="Attendence" value="GH" id="id_Attendence_6" >Govt Holiday</label></li>
+		<li><label for="id_Attendence_7"><input type="radio" name="Attendence" value="WFH" id="id_Attendence_7" >WFH</label></li>
+	</ul></p>
+	
+	<div class="form-group row"><div class="col-xs-8">
+		<label for="id_Project_name">Project name:</label> <select class="form-control" name="Project_name"  id="id_Project_name">
+		  <option value="" selected>---------</option>
+		  {% for quiz in data%}
+		  <option value="{{quiz.pk}}">{{quiz.Projectname}}</option>
+		  {%endfor%}
+	</select></div></div>
+	<div class="form-group row"><div class="col-xs-8">
+		<label for="id_Subproject_name">Subproject name:</label> <select class="form-control" name="Subproject_name"  id="id_Subproject_name">
+		  <option value="" selected>---------</option>
+	</select></div></div>
+	
+	<div class="form-group row"><div class="col-xs-8">
+	<label for="id_Task">Task:</label> <select class="form-control" name="Task"  id="id_Task">
 	  <option value="" selected>---------</option>
-	  {% for quiz in data%}
-	  <option value="{{quiz.pk}}">{{quiz.Projectname}}</option>
-	  {%endfor%}
-</select></div></div>
-<div class="form-group row"><div class="col-xs-8">
-	<label for="id_Subproject_name">Subproject name:</label> <select class="form-control" name="Subproject_name"  id="id_Subproject_name">
-	  <option value="" selected>---------</option>
-</select></div></div>
+	  <option value="Scripting">Scripting</option>
+	  <option value="Re-scripting">Rescripting</option>
+	  <option value="Analysis">Analysis</option>
+	  <option value="Manual">Manual</option>
+	  <option value="Tool Monitoring">Tool Monitoring</option>
+	  <option value="Meeting">Meeting</option>
+	  <option value="URL Identification">URL Identification</option>
+	  <option value="Duplicate Identification">Duplicate Identification</option>
+	  <option value="Hotelcode Identification">Hotelcode Identification</option>
+	</select></div></div>
+	
+	<div class="form-group row"><div class="col-xs-8">
+	<label for="id_No_count">No count:</label> <input type="number" class="form-control" name="No_count" value="0"  id="id_No_count"></div></div>
+	
+	<div class="form-group row"><div class="col-xs-8"><label for="id_No_hours">Number of Hours:</label> <input class="form-control" type="number" name="No_hours" value="0"  id="id_No_hours" step="0.01"></div></div>
+	<div class="form-group row"><div class="col-xs-8"><label for="id_Comments">Comments:</label> <input class="form-control" type="text" name="Comments" required maxlength="500" id="id_Comments"></div></div>
+	  
 
-<div class="form-group row"><div class="col-xs-8">
-<label for="id_Task">Task:</label> <select class="form-control" name="Task"  id="id_Task">
-  <option value="" selected>---------</option>
-  <option value="Scripting">Scripting</option>
-  <option value="Re-scripting">Rescripting</option>
-  <option value="Analysis">Analysis</option>
-  <option value="Manual">Manual</option>
-  <option value="Tool Monitoring">Tool Monitoring</option>
-  <option value="Meeting">Meeting</option>
-</select></div></div>
-
-<div class="form-group row"><div class="col-xs-8">
-<label for="id_No_count">No count:</label> <input type="number" class="form-control" name="No_count" value="0"  id="id_No_count"></div></div>
-
-<div class="form-group row"><div class="col-xs-8"><label for="id_No_hours">Number of Hours:</label> <input class="form-control" type="number" name="No_hours" value="0"  id="id_No_hours" step="0.01"></div></div>
-<div class="form-group row"><div class="col-xs-8"><label for="id_Comments">Comments:</label> <input class="form-control" type="text" name="Comments" required maxlength="500" id="id_Comments"></div></div>
   
-
+  

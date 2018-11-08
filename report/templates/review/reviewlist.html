@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'assets/css/style2.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/collapsib.css' %}">
+	{%if request.path  != '/reviewlist/' %}
+		<h4 align="right">{{usrname.EmpName | title}}'s Review's</h4>
+	{%endif%}
+{%for datas in form%}
+	  {%for data in datas%}
+	   {% if forloop.counter == 1%}
+		  <button class="collapsible"> {{data}}</button>
+	   {%endif%}
+	   {% if forloop.counter == 2%}
+	      <div class="content">
+		      <table border="0" class="table" >
+		      <thead>
+		      <tr>
+		       <th>Attitude</th>
+			   <th>TaskInterpretation</th>
+			   <th>TaskUnderstanding</th>
+			   <th>Approach</th>
+			   <th>Communication</th>
+			   <th>Execution</th>
+			   <th>Commitment</th>
+			   <th>Fulfillment</th>
+			   <th>Performance</th>
+			   <th>Comments</th>
+			   </tr></thead>
+		      {%for process in data%}
+			  <tr>
+			  <td> {{process.Attitude}}</td>
+			  <td> {{process.TaskInterpretation}}</td>
+			  <td> {{process.TaskUnderstanding}}</td>
+			  <td> {{process.Approach}}</td>
+			  <td> {{process.Communication}}</td>
+			  <td> {{process.Execution}}</td>
+			  <td> {{process.Commitment}}</td>
+			  <td> {{process.Fulfillment}}</td>
+			  <td> {{process.Performance}}</td>
+			  <td> {{process.Comments}}</td>
+			  </tr>
+			  {%endfor%}
+			  </table>
+		  </div>
+	   {%endif%}
+	 {%endfor%}
+	{%endfor%}
+	<br>
+	
+{%endblock%}

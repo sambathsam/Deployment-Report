@@ -31,12 +31,6 @@
   </div>
 </form>
 
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script type="text/javascript">
- function Myfunction(){
-	 window.location.href='{% url 'report_list' %}';
-	}
-</script>
 <script>
   $("#id_Project_name").change(function () {
     var url = $("#DetailForm").attr("data-cities-url");  // get the url of the `load_cities` view

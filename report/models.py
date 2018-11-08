@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser, UserManager
 
 class CustomUserManager(UserManager):
     pass
+
 class CustomUser(AbstractUser):
     objects         = CustomUserManager()
     id              = models.AutoField(primary_key=True)
@@ -40,6 +41,9 @@ class Reports(models.Model):
         ('Manual', 'Manual'),
         ('Tool Monitoring', 'Tool Monitoring'),
         ('Meeting', 'Meeting'),
+        ('URL Identification', 'URL Identification'),
+        ('Duplicate Identification', 'Duplicate Identification'),
+        ('Hotelcode Identification', 'Hotelcode Identification'),
     )
     id    = models.AutoField(primary_key=True,null=False)
     Empid = models.IntegerField(default='', blank=True)
@@ -61,3 +65,20 @@ class Reports(models.Model):
 class datesofmonth(models.Model):
     id = models.AutoField(primary_key=True)
     weekday = models.DateField()
+    
+class Review(models.Model):
+    Name  = models.CharField(max_length=250,default='', blank=True)
+    EmpID = models.IntegerField(default=0, blank=True)
+    Attitude = models.DecimalField(max_digits=9, decimal_places=2,default=0)
+    TaskInterpretation = models.DecimalField(max_digits=9, decimal_places=2,default=0) 
+    TaskUnderstanding = models.DecimalField(max_digits=9, decimal_places=2,default=0)
+    Approach = models.DecimalField(max_digits=9, decimal_places=2,default=0)
+    Communication = models.DecimalField(max_digits=9, decimal_places=2,default=0)
+    Execution = models.DecimalField(max_digits=9, decimal_places=2,default=0)
+    Commitment = models.DecimalField(max_digits=9, decimal_places=2,default=0)
+    Fulfillment = models.DecimalField(max_digits=9, decimal_places=2,default=0)
+    Performance = models.DecimalField(max_digits=9, decimal_places=2,default=0)
+    Comments = models.CharField(max_length=1500,default='', blank=True)
+    dtcollected = models.DateField(auto_now_add=True)
+    def __str__(self):
+        return self.Name

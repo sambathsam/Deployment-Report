@@ -26,8 +26,11 @@
 	        <td value ="{{ emp.Empid }}" name="{{ emp.Empid }}" id="myTable"><a href="/reportlist/{{ emp.Empid }}" class="btn btn-success btn-md">
 	          show reports
 	        </a></td>
-	        <td value ="{{ emp.Empid }}" name="{{ emp.Empid }}" id="myTable"><a href="/useredit/{{ emp.Empid }}" class="btn btn-primary btn-md">
+	        <td value ="{{ emp.Empid }}" name="{{ emp.Empid }}" id="myTable"><a href="/useredit/{{ emp.Empid }}" class="btn btn-warning btn-md">
 	          Edit User
+	        </a></td>
+	        <td value ="{{ emp.Empid }}" name="{{ emp.Empid }}" id="myTable"><a href="/review/{{ emp.Empid }}" class="btn btn-primary btn-md">
+	          Review
 	        </a></td>
 	        </tr>
                {%endif%}

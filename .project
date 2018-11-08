@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Deployment-Report</name>
+	<name>production</name>
 	<comment></comment>
 	<projects>
 	</projects>
 	<buildSpec>
 		<buildCommand>
-			<name>org.eclipse.wst.validation.validationbuilder</name>
+			<name>org.python.pydev.PyDevBuilder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
 	</buildSpec>
 	<natures>
-		<nature>org.eclipse.wst.jsdt.core.jsNature</nature>
+		<nature>org.python.pydev.pythonNature</nature>
+		<nature>org.python.pydev.django.djangoNature</nature>
 	</natures>
 </projectDescription>

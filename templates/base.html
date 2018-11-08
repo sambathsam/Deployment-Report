@@ -32,6 +32,9 @@
                     <li>
                        <a href="/reportlist">Show My Reports</a>
                     </li>
+                    <li>
+                       <a href="/reviewlist">Show My Reviews</a>
+                    </li>
                     {% if user.is_superuser %} 
                     <li>
                         <a href="/userlist">User List</a>
@@ -42,12 +45,14 @@
                 	{% if 'userlist' not in request.path%}
                 		{%if 'signup' not in request.path%}
                 		 {%if 'editreports' not in request.path%}
+                		 {%if 'export' not in request.path%}
 		                	<h4>Pending Dates</h4>
 		                    {%for date in dates%}
 		                    <li><a class="download">{{date.weekday}}</a></li>
 		                    {% empty %}
 		                     <li><a class="download">Wow there is no pending date</a></li>
 		                    {%endfor%}
+		                 {% endif %}
 		                 {% endif %}
 		                {% endif %}
                     {% endif %}
