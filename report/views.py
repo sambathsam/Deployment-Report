@@ -10,6 +10,7 @@ from django.template.loader import render_to_string
 from django.http import JsonResponse,HttpResponse
 from .models import Reports,Project,Subproject,datesofmonth,Review
 from .forms import ReportForm,ReportFormup,ReviewForm
+from xlwt import *
 import xlwt
 import datetime,json
 from django.http.response import HttpResponseRedirect
@@ -297,6 +298,60 @@ def edit_user(request,eid):
         form = CustomUserCreationForm(instance=result_set)
         return render(request, 'users/edit_user.html',{'form':form})
     
+def attendence(request):
+    import calendar
+    if request.method =="POST":
+        month = request.POST['Month']
+        a= {};i=1
+        Name_detail = CustomUser.objects.filter(~Q(Empid = 1)).values_list('Empid','EmpName')
+        for name in Name_detail:
+            name = name[1]
+            a[name.lower()] = i
+            i+=1
+        currmonth = datetime.date.today().strftime('%Y-%m')
+        year  = currmonth.split('-')[0]
+        num_days = calendar.monthrange(int(year), int(month))[1]
+        days = [datetime.date(int(year),int(month), day) for day in range(1, num_days+1)]
+        rows = Reports.objects.filter(~Q(Empid = 1),Report_date__month=int(month)).values_list('Empid','Name','Report_date','Attendence').order_by('Empid')
+        if len(rows)==0:
+            return HttpResponse("<h2>No reports for Selected Month</h2>")
+        response = HttpResponse(content_type='application/ms-excel')
+        response['Content-Disposition'] = 'attachment; filename="Attendence.xls"'
+        wb = xlwt.Workbook(encoding='utf-8')
+        ws = wb.add_sheet('Attendence',cell_overwrite_ok=True)
+        # Sheet header, first row
+        row_num = 0
+        font_style = xlwt.XFStyle()
+        font_style.font.bold = True
+        aday = ['Empid','Name']
+        for da_t in days:
+            aday.append(str(da_t))
+        columns = aday
+        for col_num in range(len(columns)):
+            ws.write(row_num, col_num, columns[col_num], font_style)
+        # Sheet body, remaining rows
+        font_style = xlwt.XFStyle()
+        for row in Name_detail:
+            row_num += 1
+            for col_num in range(len(row)):
+                ws.write(row_num, col_num, row[col_num], font_style)
+        atten = {'Present':'P','Leave':'EL','Half day leave':'HEL','WO':'WO','OT':'OT','Permission':'P','GH':'GH','WFH':'WFH'}
+        name_mat = '';date_mat = '';atte_mat = ''
+        for row in rows:
+            Name_r = row[1]
+            date_r = row[2]
+            atte_r = atten[str(row[3])]
+            if Name_r ==name_mat and date_mat == date_r:
+                if atte_r=='P' and atte_mat=='HEL':
+                    atte_r = 'HEL'
+            row_num = int(a[str(row[1].lower())])
+            col_num = aday.index(str(row[2]))    
+            ws.write(row_num, col_num, atte_r, font_style)
+            name_mat = Name_r;date_mat = date_r;atte_mat = atte_r
+        wb.save(response)
+        return response
+    else:
+        return render(request, 'review/Attendence.html')
 
 def export_users_xls(request):
     if request.method=="POST":

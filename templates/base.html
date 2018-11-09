@@ -63,6 +63,11 @@
 			          <span class="glyphicon glyphicon-print"></span> Export reports
 			        </a>
                     {% endif %}
+                    {% if user.is_superuser %} 
+                    <a href="{% url 'attendence_xls' %}" class="btn btn-success btn-md">
+			          <span class="glyphicon glyphicon-print"></span> Attendence
+			        </a>
+                    {% endif %}
                 </ul>
             </nav>
 
