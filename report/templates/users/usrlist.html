@@ -23,9 +23,15 @@
 	        <td>{{ emp.Empid }}</td>
 	        <td>{{ emp.primary_project }}</td>
 	        <td>{{ emp.date_join }}</td>
-	        <td value ="{{ emp.Empid }}" name="{{ emp.Empid }}" id="myTable"><a href="/reportlist/{{ emp.Empid }}" class="btn btn-success btn-md">
-	          show reports
-	        </a></td>
+	        {%if emp.status == 0 %}
+		        <td value ="{{ emp.Empid }}" name="{{ emp.Empid }}" id="myTable"><a href="/reportlist/{{ emp.Empid }}" class="btn btn-success btn-md">
+		          show reports
+		        </a></td>
+		    {%else%}
+		    	<td value ="{{ emp.Empid }}" name="{{ emp.Empid }}" id="myTable"><a href="/reportlist/{{ emp.Empid }}" class="btn btn-danger btn-md">
+		          show reports
+		        </a></td>
+		    {%endif%}
 	        <td value ="{{ emp.Empid }}" name="{{ emp.Empid }}" id="myTable"><a href="/useredit/{{ emp.Empid }}" class="btn btn-warning btn-md">
 	          Edit User
 	        </a></td>

@@ -16,6 +16,7 @@ class CustomUser(AbstractUser):
     primary_process = models.CharField(max_length=250)
     processwillInclude = models.CharField(blank=True, max_length=250)
     Designation = models.CharField(blank=True, max_length=250, null=True)
+    status      = models.IntegerField(default=0,blank=True)
     def __str__(self):
         return self.EmpName
     def split_tags(self):

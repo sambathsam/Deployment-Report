@@ -47,8 +47,8 @@ def HomePageView(request):
         return HttpResponseRedirect('login')
     
 class UserList(generic.ListView):
-    context_object_name = 'emp_list'   # your own name for the list as a template variable
-    queryset = CustomUser.objects.all()#filter(Empid='2002')[:5] # Get 5 books containing the title war
+    context_object_name = 'emp_list'   
+    queryset = CustomUser.objects.all()
     template_name = 'users/usrlist.html'
     
 def save_report_form(request, form, template_name):
@@ -65,7 +65,6 @@ def save_report_form(request, form, template_name):
         else:
             data['form_is_valid'] = False
     context = {'form': form,'data':data1}
-#     context = {'form': form}
     data['html_form'] = render_to_string(template_name, context, request=request)
     return JsonResponse(data)
 
@@ -246,7 +245,6 @@ def reportlist(request):
         newdict,missdates = pendingdate(request,empid)
         if request.method=='POST':
             newdict = {}
-            print ("new :-",request.POST['show_date'])
             if str(request.POST['show_date']) != '':
                 datadict = Reports.objects.filter(Empid=request.user.Empid,Report_date=request.POST['show_date'])
                 datadict = serializers.serialize("json", datadict)
@@ -302,6 +300,8 @@ def attendence(request):
     import calendar
     if request.method =="POST":
         month = request.POST['Month']
+        if month == '':
+            return HttpResponse('<h2> Please Select the Month</h2>')
         a= {};i=1
         Name_detail = CustomUser.objects.filter(~Q(Empid = 1)).values_list('Empid','EmpName')
         for name in Name_detail:
@@ -317,15 +317,13 @@ def attendence(request):
             return HttpResponse("<h2>No reports for Selected Month</h2>")
         response = HttpResponse(content_type='application/ms-excel')
         response['Content-Disposition'] = 'attachment; filename="Attendence.xls"'
-        wb = xlwt.Workbook(encoding='utf-8')
-        ws = wb.add_sheet('Attendence',cell_overwrite_ok=True)
+        wb = xlwt.Workbook(encoding='utf-8');ws = wb.add_sheet('Attendence',cell_overwrite_ok=True)
         # Sheet header, first row
-        row_num = 0
-        font_style = xlwt.XFStyle()
-        font_style.font.bold = True
+        row_num = 0;font_style = xlwt.XFStyle();font_style.font.bold = True
         aday = ['Empid','Name']
         for da_t in days:
             aday.append(str(da_t))
+        aday.append('P');aday.append('EL');aday.append('HEL');aday.append('WFH')
         columns = aday
         for col_num in range(len(columns)):
             ws.write(row_num, col_num, columns[col_num], font_style)
@@ -337,17 +335,28 @@ def attendence(request):
                 ws.write(row_num, col_num, row[col_num], font_style)
         atten = {'Present':'P','Leave':'EL','Half day leave':'HEL','WO':'WO','OT':'OT','Permission':'P','GH':'GH','WFH':'WFH'}
         name_mat = '';date_mat = '';atte_mat = ''
+        Mday = [str(da_t) for da_t in days]
+        arr_date = []
+        for M_week in Mday:
+            day_ = datetime.datetime.strptime(str(M_week),'%Y-%m-%d').strftime('%a')
+            if str(day_) =='Sun' or str(day_) =='Sat':
+                arr_date.append(M_week)
         for row in rows:
-            Name_r = row[1]
-            date_r = row[2]
-            atte_r = atten[str(row[3])]
+            Name_r = row[1];date_r = row[2];atte_r = atten[str(row[3])]
+            if Name_r !=name_mat:
+                for c in ['P','EL','HEL','WFH']:
+                    ws.write(row_num, aday.index(str(c)), xlwt.Formula('COUNTIF(C'+str(row_num+1)+':AG'+str(row_num+1)+',"'+str(c)+'")'))
+                for wend in arr_date:
+                    row_num = int(a[str(Name_r.lower())]);col_num = aday.index(str(wend))
+                    ws.write(row_num, col_num, 'WO', font_style)
             if Name_r ==name_mat and date_mat == date_r:
                 if atte_r=='P' and atte_mat=='HEL':
                     atte_r = 'HEL'
-            row_num = int(a[str(row[1].lower())])
-            col_num = aday.index(str(row[2]))    
+            row_num = int(a[str(Name_r.lower())]);col_num = aday.index(str(date_r))
             ws.write(row_num, col_num, atte_r, font_style)
             name_mat = Name_r;date_mat = date_r;atte_mat = atte_r
+        for c in ['P','EL','HEL','WFH']:
+            ws.write(row_num, aday.index(str(c)), xlwt.Formula('COUNTIF(C'+str(row_num+1)+':AG'+str(row_num+1)+',"'+str(c)+'")'))
         wb.save(response)
         return response
     else:
@@ -355,9 +364,7 @@ def attendence(request):
 
 def export_users_xls(request):
     if request.method=="POST":
-        project_re = request.POST['Project_name']
-        subpro_re  = request.POST['Subproject_name']
-                
+        project_re = request.POST['Project_name'];subpro_re  = request.POST['Subproject_name']
         if str(project_re)!='' or str(subpro_re)!='' or str(request.POST['start_date'])!='' or request.POST['end_date'] != '':
             if str(project_re)!='' and str(subpro_re)!='' and  str(request.POST['start_date'])!='' and request.POST['end_date'] != '':
                 rows = Reports.objects.filter(Project_name=project_re,Subproject_name=subpro_re,Report_date__range=[request.POST['start_date'],request.POST['end_date']]).values_list('Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments').order_by('Empid')
