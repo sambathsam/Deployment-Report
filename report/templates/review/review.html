@@ -65,6 +65,7 @@
 	        var Commit    = parseFloat(document.getElementById("id_Commitment").value);
 	        var Fulfill   = parseFloat(document.getElementById("id_Fulfillment").value);
 	        var result = (Attitude+TaskInter+Task+Approach+Commu+Execution+Commit+Fulfill)/8;
+	        var result = Math.round(result * 100) / 100
 	        document.getElementById("id_Performance").value = result;
 	    }
 	    </script>

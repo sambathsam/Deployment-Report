@@ -19,7 +19,7 @@ class CustomUserChangeForm(UserChangeForm):
         fields = UserChangeForm.Meta.fields
         
 CHOICES = [('Present', 'Present'), ('Leave', 'leave'),('Half day leave', 'Half day leave'),('Permission', 'Permission'),
-           ('WO', 'Week Off'),('OT','Over Time'),('GH','Govt Holiday'),('WFH','WFH'),]
+           ('WO', 'Week Off'),('OT','Over Time'),('GH','Govt Holiday'),('WFH','WFH'),('HWFH','HWFH'),('OTH','OTH')]
 class ReportForm(forms.ModelForm):
     Attendence  = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect(),initial='Present')
     class Meta:

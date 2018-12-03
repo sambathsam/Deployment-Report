@@ -25,7 +25,6 @@ def review(request,eid):
         result_set = get_object_or_404(CustomUser, Empid=eid)
         if request.method =="POST":
             form = ReviewForm(request.POST)
-            request.POST = request.POST.copy()
             if form.is_valid():
                 form.save()
                 return redirect('userlist')
@@ -94,7 +93,7 @@ def valuecheck(request,hours):
         request.POST['Task'] =''
         request.POST['Project_name'] =None
         request.POST['Subproject_name'] =None
-    elif (str(request.POST['Attendence'])!= "Present") and (str(request.POST['Attendence'])!= "OT") and (str(request.POST['Attendence'])!= "WFH"):
+    elif (str(request.POST['Attendence'])!= "Present") and (str(request.POST['Attendence'])!= "OT") and (str(request.POST['Attendence'])!= "WFH") and (str(request.POST['Attendence'])!= "HWFH") and (str(request.POST['Attendence'])!= "OTH"):
         request.POST = request.POST.copy()
         request.POST['No_count']=0
         request.POST['No_hours']=0
@@ -106,7 +105,8 @@ def valuecheck(request,hours):
 def pendingdate(request,empid):
     reportsdate = Reports.objects.values('Report_date').filter(Empid=empid)
     daterange = datesofmonth.objects.exclude(weekday__in = reportsdate)
-    missdates = daterange.filter(weekday__range=(datetime.date.today().replace(day=1),datetime.date.today()))
+    tbl_first = datesofmonth.objects.values('weekday').order_by('weekday')[0]
+    missdates = daterange.filter(weekday__range=(tbl_first['weekday'],datetime.date.today()))
     newdict  = {}
     some_day_last_week = timezone.now().date() - timedelta(days=7)
     datadict =  Reports.objects.filter(Empid=empid,Report_date__range=[some_day_last_week,datetime.date.today()])#,created_at__Report_date=monday_of_last_week, created_at__Report_date=monday_of_this_week)
@@ -123,7 +123,6 @@ def edit_report(request):
     if request.user.is_authenticated:
         if request.method=='POST':
             if (request.POST['show_date']) !='':
-                print(request.POST['show_date'])
                 reports = Reports.objects.filter(Empid=request.user.Empid,Report_date=request.POST['show_date'])
                 return render(request,'report/edit_report.html', {'reports': reports})
             else:
@@ -149,7 +148,7 @@ def reviewlist(request):
         return render(request, "review/reviewlist.html", {'form': review_dict, 'dates' : missdates})
     
 def reviewlist_emp(request,eid):
-    if request.user.is_authenticated:
+    if request.user.is_superuser:
         review_dict = {}
         datadict =  Review.objects.filter(EmpID=eid)#,created_at__Report_date=monday_of_last_week, created_at__Report_date=monday_of_this_week)
         datadict = serializers.serialize("json", datadict)
@@ -162,7 +161,8 @@ def reviewlist_emp(request,eid):
         newdict,missdates = pendingdate(request,eid)
         uname = get_object_or_404(CustomUser, Empid=eid)
         return render(request, "review/reviewlist.html", {'form': review_dict, 'dates' : missdates,'usrname':uname})
-        
+    else:
+        return HttpResponse("<h3>Your are not Superuser</h3>")
 def reportList(request):
     if request.user.is_authenticated:
         empid=request.user.Empid
@@ -263,25 +263,27 @@ def reportlist(request):
         return redirect('login')
     
 def reportlist_emp(request,eid):
-    newdict,missdates = pendingdate(request,eid)
-    uname = get_object_or_404(CustomUser, Empid=eid)
-    if request.method=='POST':
-        newdict = {}
-        if str(request.POST['show_date']) != '':
-            datadict = Reports.objects.filter(Empid=eid,Report_date=request.POST['show_date'])
-            datadict = serializers.serialize("json", datadict)
-            for fields in json.loads(datadict):
-                if (str(fields['fields']['Report_date'])) in newdict:
-                    newdict[str(fields['fields']['Report_date'])].append(fields['fields'])
-                else:
-                    newdict[str(fields['fields']['Report_date'])] = [fields['fields']]
-            newdict = sorted(newdict.items())
-            return render(request, "report/reportlist.html", {'form': newdict, 'dates' : missdates,'usrname':uname})
+    if request.user.is_superuser:
+        newdict,missdates = pendingdate(request,eid)
+        uname = get_object_or_404(CustomUser, Empid=eid)
+        if request.method=='POST':
+            newdict = {}
+            if str(request.POST['show_date']) != '':
+                datadict = Reports.objects.filter(Empid=eid,Report_date=request.POST['show_date'])
+                datadict = serializers.serialize("json", datadict)
+                for fields in json.loads(datadict):
+                    if (str(fields['fields']['Report_date'])) in newdict:
+                        newdict[str(fields['fields']['Report_date'])].append(fields['fields'])
+                    else:
+                        newdict[str(fields['fields']['Report_date'])] = [fields['fields']]
+                newdict = sorted(newdict.items())
+                return render(request, "report/reportlist.html", {'form': newdict, 'dates' : missdates,'usrname':uname})
+            else:
+                return HttpResponse ("<h2>Please select the date before Click Search Button</h2><br><h4> Reload current page</h4>")
         else:
-            return HttpResponse ("<h2>Please select the date before Click Search Button</h2><br><h4> Reload current page</h4>")
+            return render(request, "report/reportlist.html", {'form': newdict, 'dates' : missdates,'usrname':uname})
     else:
-        return render(request, "report/reportlist.html", {'form': newdict, 'dates' : missdates,'usrname':uname})
-
+        return HttpResponse("<h3>Your are not Superuser</h3>")
 def edit_user(request,eid):
     if request.user.is_authenticated:
         result_set = get_object_or_404(CustomUser, Empid=eid)
@@ -297,127 +299,132 @@ def edit_user(request,eid):
         return render(request, 'users/edit_user.html',{'form':form})
     
 def attendence(request):
-    import calendar
-    if request.method =="POST":
-        month = request.POST['Month']
-        if month == '':
-            return HttpResponse('<h2> Please Select the Month</h2>')
-        a= {};i=1
-        Name_detail = CustomUser.objects.filter(~Q(Empid = 1)).values_list('Empid','EmpName')
-        for name in Name_detail:
-            name = name[1]
-            a[name.lower()] = i
-            i+=1
-        currmonth = datetime.date.today().strftime('%Y-%m')
-        year  = currmonth.split('-')[0]
-        num_days = calendar.monthrange(int(year), int(month))[1]
-        days = [datetime.date(int(year),int(month), day) for day in range(1, num_days+1)]
-        rows = Reports.objects.filter(~Q(Empid = 1),Report_date__month=int(month)).values_list('Empid','Name','Report_date','Attendence').order_by('Empid')
-        if len(rows)==0:
-            return HttpResponse("<h2>No reports for Selected Month</h2>")
-        response = HttpResponse(content_type='application/ms-excel')
-        response['Content-Disposition'] = 'attachment; filename="Attendence.xls"'
-        wb = xlwt.Workbook(encoding='utf-8');ws = wb.add_sheet('Attendence',cell_overwrite_ok=True)
-        # Sheet header, first row
-        row_num = 0;font_style = xlwt.XFStyle();font_style.font.bold = True
-        aday = ['Empid','Name']
-        for da_t in days:
-            aday.append(str(da_t))
-        aday.append('P');aday.append('EL');aday.append('HEL');aday.append('WFH')
-        columns = aday
-        for col_num in range(len(columns)):
-            ws.write(row_num, col_num, columns[col_num], font_style)
-        # Sheet body, remaining rows
-        font_style = xlwt.XFStyle()
-        for row in Name_detail:
-            row_num += 1
-            for col_num in range(len(row)):
-                ws.write(row_num, col_num, row[col_num], font_style)
-        atten = {'Present':'P','Leave':'EL','Half day leave':'HEL','WO':'WO','OT':'OT','Permission':'P','GH':'GH','WFH':'WFH'}
-        name_mat = '';date_mat = '';atte_mat = ''
-        Mday = [str(da_t) for da_t in days]
-        arr_date = []
-        for M_week in Mday:
-            day_ = datetime.datetime.strptime(str(M_week),'%Y-%m-%d').strftime('%a')
-            if str(day_) =='Sun' or str(day_) =='Sat':
-                arr_date.append(M_week)
-        for row in rows:
-            Name_r = row[1];date_r = row[2];atte_r = atten[str(row[3])]
-            if Name_r !=name_mat:
-                for c in ['P','EL','HEL','WFH']:
-                    ws.write(row_num, aday.index(str(c)), xlwt.Formula('COUNTIF(C'+str(row_num+1)+':AG'+str(row_num+1)+',"'+str(c)+'")'))
-                for wend in arr_date:
-                    row_num = int(a[str(Name_r.lower())]);col_num = aday.index(str(wend))
-                    ws.write(row_num, col_num, 'WO', font_style)
-            if Name_r ==name_mat and date_mat == date_r:
-                if atte_r=='P' and atte_mat=='HEL':
-                    atte_r = 'HEL'
-            row_num = int(a[str(Name_r.lower())]);col_num = aday.index(str(date_r))
-            ws.write(row_num, col_num, atte_r, font_style)
-            name_mat = Name_r;date_mat = date_r;atte_mat = atte_r
-        for c in ['P','EL','HEL','WFH']:
-            ws.write(row_num, aday.index(str(c)), xlwt.Formula('COUNTIF(C'+str(row_num+1)+':AG'+str(row_num+1)+',"'+str(c)+'")'))
-        wb.save(response)
-        return response
+    if request.user.is_superuser:
+        import calendar
+        if request.method =="POST":
+            month = request.POST['Month']
+            if month == '':
+                return HttpResponse('<h2> Please Select the Month</h2>')
+            a= {};i=1
+            Name_detail = CustomUser.objects.filter(~Q(Empid = 1)).values_list('Empid','EmpName')
+            for name in Name_detail:
+                name = name[1]
+                a[name.lower()] = i
+                i+=1
+            currmonth = datetime.date.today().strftime('%Y-%m')
+            year  = currmonth.split('-')[0]
+            num_days = calendar.monthrange(int(year), int(month))[1]
+            days = [datetime.date(int(year),int(month), day) for day in range(1, num_days+1)]
+            rows = Reports.objects.filter(~Q(Empid = 1),Report_date__month=int(month)).values_list('Empid','Name','Report_date','Attendence').order_by('Empid')
+            if len(rows)==0:
+                return HttpResponse("<h2>No reports for Selected Month</h2>")
+            response = HttpResponse(content_type='application/ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="Attendence.xls"'
+            wb = xlwt.Workbook(encoding='utf-8');ws = wb.add_sheet('Attendence',cell_overwrite_ok=True)
+            # Sheet header, first row
+            row_num = 0;font_style = xlwt.XFStyle();font_style.font.bold = True
+            aday = ['Empid','Name']
+            for da_t in days:
+                aday.append(str(da_t))
+            aday.append('P');aday.append('EL');aday.append('HEL');aday.append('WFH')
+            columns = aday
+            for col_num in range(len(columns)):
+                ws.write(row_num, col_num, columns[col_num], font_style)
+            # Sheet body, remaining rows
+            font_style = xlwt.XFStyle()
+            for row in Name_detail:
+                row_num += 1
+                for col_num in range(len(row)):
+                    ws.write(row_num, col_num, row[col_num], font_style)
+            atten = {'Present':'P','Leave':'EL','Half day leave':'HEL','WO':'WO','OT':'OT','Permission':'P','GH':'GH','WFH':'WFH','HWFH':'HWFH','OTH':'OTH'}
+            name_mat = '';date_mat = '';atte_mat = ''
+            Mday = [str(da_t) for da_t in days]
+            arr_date = []
+            for M_week in Mday:
+                day_ = datetime.datetime.strptime(str(M_week),'%Y-%m-%d').strftime('%a')
+                if str(day_) =='Sun' or str(day_) =='Sat':
+                    arr_date.append(M_week)
+            for row in rows:
+                Name_r = row[1];date_r = row[2];atte_r = atten[str(row[3])]
+                if Name_r !=name_mat:
+                    for c in ['P','EL','HEL','WFH']:
+                        ws.write(row_num, aday.index(str(c)), xlwt.Formula('COUNTIF(C'+str(row_num+1)+':AG'+str(row_num+1)+',"'+str(c)+'")'))
+                    for wend in arr_date:
+                        row_num = int(a[str(Name_r.lower())]);col_num = aday.index(str(wend))
+                        ws.write(row_num, col_num, 'WO', font_style)
+                if Name_r ==name_mat and date_mat == date_r:
+                    if atte_r=='P' and atte_mat=='HEL':
+                        atte_r = 'HEL'
+                row_num = int(a[str(Name_r.lower())]);col_num = aday.index(str(date_r))
+                ws.write(row_num, col_num, atte_r, font_style)
+                name_mat = Name_r;date_mat = date_r;atte_mat = atte_r
+            for c in ['P','EL','HEL','WFH']:
+                ws.write(row_num, aday.index(str(c)), xlwt.Formula('COUNTIF(C'+str(row_num+1)+':AG'+str(row_num+1)+',"'+str(c)+'")'))
+            wb.save(response)
+            return response
+        else:
+            return render(request, 'review/Attendence.html')
     else:
-        return render(request, 'review/Attendence.html')
+        return HttpResponse("<h3>Your are not Superuser</h3>")
 
 def export_users_xls(request):
-    if request.method=="POST":
-        project_re = request.POST['Project_name'];subpro_re  = request.POST['Subproject_name']
-        if str(project_re)!='' or str(subpro_re)!='' or str(request.POST['start_date'])!='' or request.POST['end_date'] != '':
-            if str(project_re)!='' and str(subpro_re)!='' and  str(request.POST['start_date'])!='' and request.POST['end_date'] != '':
-                rows = Reports.objects.filter(Project_name=project_re,Subproject_name=subpro_re,Report_date__range=[request.POST['start_date'],request.POST['end_date']]).values_list('Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments').order_by('Empid')
-            elif str(project_re)!='' and str(subpro_re)=='' and  str(request.POST['start_date'])!='' and request.POST['end_date'] != '':
-                rows = Reports.objects.filter(Project_name=project_re,Report_date__range=[request.POST['start_date'],request.POST['end_date']]).values_list('Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments').order_by('Empid')
-            elif str(project_re)=='' and str(subpro_re)=='' and  str(request.POST['start_date'])!='' and str(request.POST['end_date']) != '':
-                rows = Reports.objects.filter(Report_date__range=[request.POST['start_date'],request.POST['end_date']]).values_list('Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments').order_by('Empid')
-            elif str(project_re)=='' and str(subpro_re)!='' and  str(request.POST['start_date'])!='' and request.POST['end_date'] != '':
-                rows = Reports.objects.filter(Subproject_name=subpro_re,Report_date__range=[request.POST['start_date'],request.POST['end_date']]).values_list('Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments').order_by('Empid')
-            elif str(project_re)!='' and str(subpro_re)!='' and  str(request.POST['start_date']) =='' and request.POST['end_date'] == '':
-                rows = Reports.objects.filter(Project_name=project_re,Subproject_name=subpro_re).values_list('Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments').order_by('Empid')
-            elif str(project_re)!='' and str(subpro_re)=='' and  str(request.POST['start_date']) =='' and request.POST['end_date'] == '':
-                rows = Reports.objects.filter(Project_name=project_re).values_list('Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments').order_by('Empid')
-            elif str(project_re)=='' and str(subpro_re)!='' and  str(request.POST['start_date']) =='' and request.POST['end_date'] == '':
-                rows = Reports.objects.filter(Subproject_name=subpro_re).values_list('Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments').order_by('Empid')
+    if request.user.is_superuser:
+        if request.method=="POST":
+            project_re = request.POST['Project_name'];subpro_re  = request.POST['Subproject_name']
+            if str(project_re)!='' or str(subpro_re)!='' or str(request.POST['start_date'])!='' or request.POST['end_date'] != '':
+                if str(project_re)!='' and str(subpro_re)!='' and  str(request.POST['start_date'])!='' and request.POST['end_date'] != '':
+                    rows = Reports.objects.filter(Project_name=project_re,Subproject_name=subpro_re,Report_date__range=[request.POST['start_date'],request.POST['end_date']]).values_list('Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments').order_by('Empid')
+                elif str(project_re)!='' and str(subpro_re)=='' and  str(request.POST['start_date'])!='' and request.POST['end_date'] != '':
+                    rows = Reports.objects.filter(Project_name=project_re,Report_date__range=[request.POST['start_date'],request.POST['end_date']]).values_list('Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments').order_by('Empid')
+                elif str(project_re)=='' and str(subpro_re)=='' and  str(request.POST['start_date'])!='' and str(request.POST['end_date']) != '':
+                    rows = Reports.objects.filter(Report_date__range=[request.POST['start_date'],request.POST['end_date']]).values_list('Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments').order_by('Empid')
+                elif str(project_re)=='' and str(subpro_re)!='' and  str(request.POST['start_date'])!='' and request.POST['end_date'] != '':
+                    rows = Reports.objects.filter(Subproject_name=subpro_re,Report_date__range=[request.POST['start_date'],request.POST['end_date']]).values_list('Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments').order_by('Empid')
+                elif str(project_re)!='' and str(subpro_re)!='' and  str(request.POST['start_date']) =='' and request.POST['end_date'] == '':
+                    rows = Reports.objects.filter(Project_name=project_re,Subproject_name=subpro_re).values_list('Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments').order_by('Empid')
+                elif str(project_re)!='' and str(subpro_re)=='' and  str(request.POST['start_date']) =='' and request.POST['end_date'] == '':
+                    rows = Reports.objects.filter(Project_name=project_re).values_list('Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments').order_by('Empid')
+                elif str(project_re)=='' and str(subpro_re)!='' and  str(request.POST['start_date']) =='' and request.POST['end_date'] == '':
+                    rows = Reports.objects.filter(Subproject_name=subpro_re).values_list('Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments').order_by('Empid')
+                else:
+                    return HttpResponse("<h2>Please Select Dates Correctly</h2>")
+                if len(rows)==0:
+                    return HttpResponse("<h2>No reports for Selected Dates</h2>")
             else:
-                return HttpResponse("<h2>Please Select Dates Correctly</h2>")
-            if len(rows)==0:
-                return HttpResponse("<h2>No reports for Selected Dates</h2>")
+                return HttpResponse("<h2>Please select Project Or Dates</h2><br><h2>Reload current Page</h2>")
+            
+            response = HttpResponse(content_type='application/ms-excel')
+            if str(request.POST['start_date']) !='':
+                response['Content-Disposition'] = 'attachment; filename="Reports_'+str(str(request.POST['start_date']))+'.xls"'
+            else:
+                response['Content-Disposition'] = 'attachment; filename="Reports.xls"'
+            wb = xlwt.Workbook(encoding='utf-8')
+            ws = wb.add_sheet('Reports')
+            # Sheet header, first row
+            row_num = 0
+            font_style = xlwt.XFStyle()
+            font_style.font.bold = True
+            columns = ['Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments']
+            for col_num in range(len(columns)):
+                ws.write(row_num, col_num, columns[col_num], font_style)
+            # Sheet body, remaining rows
+            font_style = xlwt.XFStyle()
+            for row in rows:
+                lt = list(row)
+                lt[3]=str(row[3])
+                if row[5]!=None:
+                    lt[5]=str(Project.objects.get(id=int(row[5])))
+                if row[6]!=None:
+                    lt[6]=str(Subproject.objects.get(id=int(row[6])))
+                row = tuple(lt)
+                row_num += 1
+                for col_num in range(len(row)):
+                    ws.write(row_num, col_num, row[col_num], font_style)
+            wb.save(response)
+            return response
         else:
-            return HttpResponse("<h2>Please select Project Or Dates</h2><br><h2>Reload current Page</h2>")
-        
-        response = HttpResponse(content_type='application/ms-excel')
-        if str(request.POST['start_date']) !='':
-            response['Content-Disposition'] = 'attachment; filename="Reports_'+str(str(request.POST['start_date']))+'.xls"'
-        else:
-            response['Content-Disposition'] = 'attachment; filename="Reports.xls"'
-        wb = xlwt.Workbook(encoding='utf-8')
-        ws = wb.add_sheet('Reports')
-        # Sheet header, first row
-        row_num = 0
-        font_style = xlwt.XFStyle()
-        font_style.font.bold = True
-        columns = ['Empid','Name','Primarytask','Report_date','Attendence','Project_name', 'Subproject_name','Task','No_hours','No_count','Comments']
-        for col_num in range(len(columns)):
-            ws.write(row_num, col_num, columns[col_num], font_style)
-        # Sheet body, remaining rows
-        font_style = xlwt.XFStyle()
-        for row in rows:
-            lt = list(row)
-            lt[3]=str(row[3])
-            if row[5]!=None:
-                lt[5]=str(Project.objects.get(id=int(row[5])))
-            if row[6]!=None:
-                lt[6]=str(Subproject.objects.get(id=int(row[6])))
-            row = tuple(lt)
-            row_num += 1
-            for col_num in range(len(row)):
-                ws.write(row_num, col_num, row[col_num], font_style)
-        wb.save(response)
-        return response
+            pro = Project.objects.all()
+            sub_pro = Subproject.objects.all()
+            return render(request, 'report/export_report.html',{'pro':pro,'spro':sub_pro})
     else:
-        pro = Project.objects.all()
-        sub_pro = Subproject.objects.all()
-        return render(request, 'report/export_report.html',{'pro':pro,'spro':sub_pro})
-    
+        return HttpResponse("<h3>Your are not Superuser</h3>")

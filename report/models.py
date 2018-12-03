@@ -34,6 +34,10 @@ class Subproject(models.Model):
     def __str__(self):
         return self.Subproject_name
 
+# Feedback Analysis
+# Data Mapping
+# Quality Check
+# Process Delivery
 class Reports(models.Model):
     TASK_TYPES = (
         ('Scripting', 'Scripting'),
@@ -45,6 +49,13 @@ class Reports(models.Model):
         ('URL Identification', 'URL Identification'),
         ('Duplicate Identification', 'Duplicate Identification'),
         ('Hotelcode Identification', 'Hotelcode Identification'),
+        ('Team Handling', 'Team Handling'),
+        ('Process Evaluation', 'Process Evaluation'),
+        ('New Project Analysis', 'New Project Analysis'),
+        ('Feedback Analysis', 'Feedback Analysis'),
+        ('Data Mapping', 'Data Mapping'),
+        ('Quality Check', 'Quality Check'),
+        ('Process Delivery', 'Process Delivery'),
     )
     id    = models.AutoField(primary_key=True,null=False)
     Empid = models.IntegerField(default='', blank=True)
